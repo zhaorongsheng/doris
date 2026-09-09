@@ -81,7 +81,13 @@ public class ConnectorPluginSurfaceTest {
             Assertions.assertNotNull(in, "missing connector plugin API version resource");
             version.load(in);
         }
-        // Latest-schema publication is explicit in major 8; older engines cannot honor the opt-in contract.
+        // Major 8 changed the public surface twice over: latest-schema publication became an explicit
+        // opt-in that older engines cannot honor, and connector partition pruning added
+        // ConnectorCapability.SUPPORTS_CONNECTOR_PARTITION_PRUNING on top of major 7 (storage predicate
+        // pruning, provider-level DDL validation and ConnectorMetadata's listsPartitionsAtSnapshot - the
+        // method a connector answers "my partition listing is exact at the pinned snapshot" with). A plugin
+        // built against an earlier major must be refused rather than run against a contract it did not
+        // compile against.
         Assertions.assertEquals("8.0", version.getProperty("api.version"));
     }
 
